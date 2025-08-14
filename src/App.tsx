@@ -7,6 +7,8 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { lazy, Suspense, useState, useEffect } from "react";
 import { persistQueryClient } from "@tanstack/react-query-persist-client";
 import { createSyncStoragePersister } from "@tanstack/query-sync-storage-persister";
+import { useAuthStore } from "@/store/authStore";
+import { presenceService } from "@/services/presenceService";
 
 // Lazy load page components
 const Index = lazy(() => import("./pages/Index"));
@@ -15,6 +17,8 @@ const NotFound = lazy(() => import("./pages/NotFound"));
 const UserDashboard = lazy(() => import("./pages/UserDashboard").then(module => ({ default: module.UserDashboard })));
 const SharedSummary = lazy(() => import("./pages/SharedSummary").then(module => ({ default: module.SharedSummary })));
 const SearchResults = lazy(() => import("./pages/SearchResults"));
+const ComingSoon = lazy(() => import("./pages/ComingSoon"));
+const UsersPage = lazy(() => import("./pages/UsersPage"));
 
 // Create persister to store cache in localStorage
 const localStoragePersister = createSyncStoragePersister({
@@ -28,6 +32,7 @@ const localStoragePersister = createSyncStoragePersister({
 const App = () => {
   // Track online status
   const [isOnline, setIsOnline] = useState(navigator.onLine);
+  const { user } = useAuthStore();
 
   useEffect(() => {
     // Update online status
@@ -42,6 +47,22 @@ const App = () => {
       window.removeEventListener("offline", handleOffline);
     };
   }, []);
+
+  // Initialize presence service when user changes
+  useEffect(() => {
+    // Initialize presence service with current user ID
+    presenceService.initialize(user?.$id || null);
+    
+    // Handle any pending offline status from previous session
+    if (user?.$id) {
+      presenceService.handlePendingOfflineStatus();
+    }
+    
+    // Clean up presence service when component unmounts
+    return () => {
+      presenceService.cleanup();
+    };
+  }, [user]);
 
   // Create a stable QueryClient instance that persists between renders
   const [queryClient] = useState(() => {
@@ -93,8 +114,9 @@ const App = () => {
               <Route path="/newest" element={<Index />} />
               <Route path="/ask" element={<Index />} />
               <Route path="/show" element={<Index />} />
-              <Route path="/jobs" element={<Index />} />
-              <Route path="/dashboard" element={<UserDashboard />} />
+              <Route path="/jobs" element={<ComingSoon title="Jobs Coming Soon" message="We're working on bringing you the best tech job listings. Check back soon!" />} />
+              <Route path="/dashboard" element={<ComingSoon title="Dashboard Under Development" message="Our user dashboard is currently being built with exciting new features. Please check back later." />} />
+              <Route path="/users" element={<UsersPage />} />
               <Route path="/item/:id" element={<Comments />} />
               <Route path="/user/:username" element={<Index />} />
               <Route path="/from/:domain" element={<Index />} />

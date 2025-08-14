@@ -13,6 +13,7 @@ import {
   ChevronsUp,
   FileText,
   Settings,
+  Users,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -157,6 +158,13 @@ export function MainNav() {
                 className="font-medium text-muted-foreground transition-colors hover:text-hn-orange"
               >
                 Jobs
+              </Link>
+              
+              <Link
+                to="/users"
+                className="font-medium text-muted-foreground transition-colors hover:text-hn-orange"
+              >
+                Users
               </Link>
               
             </nav>
@@ -320,6 +328,14 @@ export function MainNav() {
                 >
                   <Briefcase className="h-5 w-5 text-hn-orange" />
                   <span>Jobs</span>
+                </Link>
+                <Link 
+                  to="/users" 
+                  className="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-muted"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  <Users className="h-5 w-5 text-hn-orange" />
+                  <span>Users</span>
                 </Link>
                 <Link 
                   to="/dashboard" 
